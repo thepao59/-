@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder Pro (Interactive)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+
+    <header class="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-cyan-400">🖥️ PC Builder Pro</h1>
+        <button class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition">เข้าสู่ระบบ</button>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+        
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+            <h2 class="text-lg font-bold mb-4 text-cyan-400">1. เลือกชิ้นส่วนอุปกรณ์</h2>
+            <div class="space-y-3">
+                <div class="p-3 bg-gray-700 rounded-lg flex justify-between items-center border border-transparent hover:border-cyan-500 transition">
+                    <div>
+                        <p class="font-semibold text-sm">Intel Core i7-14700K</p>
+                        <p class="text-xs text-gray-400">Socket LGA1700 | 125W</p>
+                        <p class="text-cyan-400 font-bold mt-1">฿15,500</p>
+                    </div>
+                    <button onclick="selectComponent('cpu', 'Intel Core i7-14700K', 15500)" class="bg-cyan-500 hover:bg-cyan-600 text-xs px-3 py-1.5 rounded font-bold transition">เลือก</button>
+                </div>
+                <div class="p-3 bg-gray-700 rounded-lg flex justify-between items-center border border-transparent hover:border-cyan-500 transition">
+                    <div>
+                        <p class="font-semibold text-sm">NVIDIA RTX 4070 Ti Super</p>
+                        <p class="text-xs text-gray-400">16GB GDDR6X | 285W</p>
+                        <p class="text-cyan-400 font-bold mt-1">฿32,900</p>
+                    </div>
+                    <button onclick="selectComponent('gpu', 'NVIDIA RTX 4070 Ti Super', 32900)" class="bg-cyan-500 hover:bg-cyan-600 text-xs px-3 py-1.5 rounded font-bold transition">เลือก</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold mb-4 text-cyan-400">2. รายการจัดสเปคของคุณ</h2>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center p-2 bg-gray-750 border-b border-gray-700 min-h-[40px]">
+                        <span class="text-gray-400 w-16">CPU:</span>
+                        <span id="display-cpu-name" class="font-medium text-gray-400 italic">ยังไม่ได้เลือก</span>
+                        <div class="flex items-center gap-2">
+                            <span id="display-cpu-price" class="text-cyan-400 font-semibold"></span>
+                            <button id="btn-remove-cpu" onclick="removeComponent('cpu')" class="hidden text-rose-500 hover:text-rose-400 font-bold">❌</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-gray-750 border-b border-gray-700 min-h-[40px]">
+                        <span class="text-gray-400 w-16">GPU:</span>
+                        <span id="display-gpu-name" class="font-medium text-gray-400 italic">ยังไม่ได้เลือก</span>
+                        <div class="flex items-center gap-2">
+                            <span id="display-gpu-price" class="text-cyan-400 font-semibold"></span>
+                            <button id="btn-remove-gpu" onclick="removeComponent('gpu')" class="hidden text-rose-500 hover:text-rose-400 font-bold">❌</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="clearAll()" class="w-full mt-6 bg-rose-600 hover:bg-rose-700 text-xs py-2 rounded-lg font-semibold transition">ล้างสเปคทั้งหมด</button>
+        </div>
+
+        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold mb-4 text-cyan-400">3. สรุปภาพรวม</h2>
+                <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                    <p class="text-xs text-gray-400">ราคารวมทั้งหมด</p>
+                    <p id="total-price" class="text-3xl font-black text-emerald-400 mt-1">฿0</p>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between items-center bg-gray-750 p-2 rounded">
+                        <span>สถานะความเข้ากันได้:</span>
+                        <span id="compatibility-status" class="text-gray-400 font-bold bg-gray-700 px-2 py-0.5 rounded">รอเลือกอุปกรณ์</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="alert('บันทึกสเปคสำเร็จแล้ว!')" class="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold text-center transition shadow-lg shadow-emerald-500/20">
+                💾 บันทึกสเปค / สั่งซื้อชุดนี้
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // สร้างตัวแปรเก็บข้อมูลสินค้าที่เลือก
+        let currentBuild = {
+            cpu: { name: "", price: 0 },
+            gpu: { name: "", price: 0 }
+        };
+
+        // ฟังก์ชันเมื่อกดปุ่ม "เลือก"
+        function selectComponent(type, name, price) {
+            currentBuild[type].name = name;
+            currentBuild[type].price = price;
+            updateUI();
+        }
+
+        // ฟังก์ชันเมื่อกดปุ่ม "ลบ ❌"
+        function removeComponent(type) {
+            currentBuild[type].name = "";
+            currentBuild[type].price = 0;
+            updateUI();
+        }
+
+        // ฟังก์ชันล้างทั้งหมด
+        function clearAll() {
+            currentBuild.cpu = { name: "", price: 0 };
+            currentBuild.gpu = { name: "", price: 0 };
+            updateUI();
+        }
+
+        // ฟังก์ชันอัปเดตหน้าจอและคำนวณราคาใหม่
+        function updateUI() {
+            let totalPrice = 0;
+
+            // วนลูปเช็กเพื่ออัปเดตข้อความบนหน้าจอ
+            for (let type in currentBuild) {
+                const nameElem = document.getElementById(`display-${type}-name`);
+                const priceElem = document.getElementById(`display-${type}-price`);
+                const removeBtn = document.getElementById(`btn-remove-${type}`);
+
+                if (currentBuild[type].name) {
+                    nameElem.innerText = currentBuild[type].name;
+                    nameElem.className = "font-medium text-gray-200"; // เปลี่ยนสีตัวอักษรให้เด่นขึ้น
+                    priceElem.innerText = "฿" + currentBuild[type].price.toLocaleString();
+                    removeBtn.classList.remove('hidden'); // แสดงปุ่มลบ
+                    totalPrice += currentBuild[type].price;
+                } else {
+                    nameElem.innerText = "ยังไม่ได้เลือก";
+                    nameElem.className = "font-medium text-gray-400 italic";
+                    priceElem.innerText = "";
+                    removeBtn.classList.add('hidden'); // ซ่อนปุ่มลบ
+                }
+            }
+
+            // อัปเดตราคารวม
+            document.getElementById('total-price').innerText = "฿" + totalPrice.toLocaleString();
+
+            // อัปเดตสถานะความเข้ากันได้แบบง่ายๆ
+            const statusElem = document.getElementById('compatibility-status');
+            if (currentBuild.cpu.name || currentBuild.gpu.name) {
+                statusElem.innerText = "🟢 ผ่าน (Compatible)";
+                statusElem.className = "text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded";
+            } else {
+                statusElem.innerText = "รอเลือกอุปกรณ์";
+                statusElem.className = "text-gray-400 font-bold bg-gray-700 px-2 py-0.5 rounded";
+            }
+        }
+    </script>
+</body>
+</html>
